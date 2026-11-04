@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1a1030">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Scripture Gems">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Scripture Gems</title>
+<style>
+:root{
+  --bg:#1a1030; --panel:#2b1f52; --panel2:#352866; --line:#4a3b80;
+  --ink:#f6f1ff; --mute:#b9acdd;
+  --stone1:#6f6194; --stone2:#43376a;
+  --emerald:#2ed39a; --ruby:#ff5d78; --topaz:#ffbf47; --sapphire:#5b9bff; --amethyst:#b184ff; --ice:#8fe9ff;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:"Avenir Next","Segoe UI",Roboto,"Helvetica Neue",system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.4}
+body{overflow-x:hidden;touch-action:manipulation;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0;z-index:-2;background:linear-gradient(155deg,#22154a 0%,#150c28 55%,#1a1030 100%)}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+   linear-gradient(115deg,transparent 0 36%,rgba(177,132,255,.07) 36% 50%,transparent 50%),
+   linear-gradient(62deg,transparent 0 62%,rgba(91,155,255,.06) 62% 76%,transparent 76%)}
+#app{max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;position:relative;
+  padding:max(14px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom))}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+button:focus-visible{outline:3px solid var(--topaz);outline-offset:3px}
+h1,h2,h3,p{margin:0}
+.gem{display:block;flex:none}
+
+/* buttons */
+.primary{display:block;width:100%;background:linear-gradient(180deg,#ffd37a,#f0a82a);color:#2b1a05;font-weight:700;font-size:1.12rem;
+  padding:16px 20px;border-radius:16px;box-shadow:0 5px 0 #a26b0e,0 10px 22px rgba(0,0,0,.35);transition:transform .08s,box-shadow .08s}
+.primary:active{transform:translateY(4px);box-shadow:0 1px 0 #a26b0e,0 4px 10px rgba(0,0,0,.35)}
+.secondary{display:block;width:100%;background:rgba(255,255,255,.07);border:1.5px solid var(--line);font-weight:650;font-size:1.05rem;padding:14px 18px;border-radius:16px}
+.secondary:active{background:rgba(255,255,255,.14)}
+.icon-btn{width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.07);border:1.5px solid var(--line);display:grid;place-items:center}
+.icon-btn svg{width:22px;height:22px;fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* home */
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.top .tr{display:flex;gap:10px}
+.lang{display:flex;height:46px;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.07);border:1.5px solid var(--line)}
+.lang button{padding:0 14px;font-weight:700;font-size:.95rem;color:var(--mute)}
+.lang button.on{background:linear-gradient(180deg,#ffd37a,#f0a82a);color:#2b1a05}
+.hero{text-align:center;padding:2px 0 18px}
+.hero .logo{margin:0 auto 10px;filter:drop-shadow(0 8px 22px rgba(177,132,255,.55));animation:logoin .9s cubic-bezier(.2,.9,.3,1.2) both}
+.hero .logo .glint{transform-origin:center;animation:glint 1.1s .7s ease-out both}
+@keyframes logoin{from{transform:translateY(-14px) scale(.8);opacity:0}to{transform:none;opacity:1}}
+@keyframes glint{0%{opacity:0;transform:scale(.2) rotate(0)}50%{opacity:1}100%{opacity:0;transform:scale(1.4) rotate(90deg)}}
+.hero h1{font-family:var(--serif);font-size:2.35rem;font-weight:700;letter-spacing:.2px;line-height:1.1}
+.hero p{color:var(--mute);margin-top:8px;font-size:1.05rem}
+.chips{display:flex;justify-content:center;gap:10px;margin:14px 0 4px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1.5px solid var(--line);border-radius:999px;padding:7px 14px 7px 10px;font-weight:650;font-size:.98rem}
+.sect{font-family:var(--serif);font-size:1.25rem;font-weight:700;margin:22px 2px 12px}
+.lvl{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px 16px;border-radius:20px;margin-bottom:12px;
+  background:linear-gradient(135deg,var(--panel2),var(--panel));border:1.5px solid var(--line);box-shadow:0 5px 0 #17102c;transition:transform .08s,box-shadow .08s}
+.lvl:not([disabled]):active{transform:translateY(3px);box-shadow:0 2px 0 #17102c}
+.lvl[disabled]{opacity:.62;cursor:default}
+.lvl .gtile{width:62px;height:62px;border-radius:16px;background:rgba(0,0,0,.25);display:grid;place-items:center;flex:none}
+.lvl .info{flex:1;min-width:0}
+.lvl .nm{font-family:var(--serif);font-size:1.3rem;font-weight:700}
+.lvl .sub{color:var(--mute);font-size:.95rem}
+.lvl .meta{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:.92rem;color:var(--mute)}
+.lvl .lock{width:26px;height:26px;fill:none;stroke:var(--mute);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.stars{display:flex;gap:3px}
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.badge{text-align:center;padding:12px 6px 10px;border-radius:18px;background:rgba(255,255,255,.05);border:1.5px solid var(--line)}
+.badge .med{width:54px;height:54px;border-radius:50%;margin:0 auto 6px;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#4a3b80,#241a47);border:2px solid var(--line)}
+.badge b{display:block;font-size:.86rem;line-height:1.2}
+.badge small{display:block;color:var(--mute);font-size:.76rem;line-height:1.25;margin-top:2px}
+.badge.off .med .gem{filter:grayscale(1) brightness(.55)}
+.badge.off b{color:var(--mute)}
+.foot{text-align:center;color:var(--mute);font-size:.8rem;margin-top:26px;line-height:1.5}
+
+/* play */
+.hud{display:flex;align-items:center;gap:12px}
+.hud-mid{flex:1;min-width:0;text-align:center}
+.lvname{font-family:var(--serif);font-weight:700;font-size:1.08rem}
+.vnum{color:var(--mute);font-size:.9rem}
+.dots{display:flex;justify-content:center;gap:5px;margin-top:5px}
+.dots i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.16)}
+.dots i.ok{background:var(--emerald)}
+.dots i.no{background:var(--ruby)}
+.dots i.cur{background:transparent;box-shadow:0 0 0 2px var(--topaz)}
+.score{min-width:64px;text-align:right;font-weight:800;font-size:1.3rem;font-variant-numeric:tabular-nums}
+.score.pop{animation:pop .35s}
+@keyframes pop{50%{transform:scale(1.25);color:var(--topaz)}}
+.gems{display:flex;justify-content:center;gap:10px;margin:14px 0 12px}
+.gems .gem{transition:filter .3s,opacity .3s}
+.gems .gem.lost{filter:grayscale(1) brightness(.5);opacity:.5;animation:crack .55s}
+@keyframes crack{0%{transform:scale(1)}25%{transform:scale(1.35) rotate(-10deg)}55%{transform:scale(.8) rotate(12deg)}100%{transform:scale(1)}}
+.slab{background:linear-gradient(160deg,#322460,#251a49);border:1.5px solid var(--line);border-radius:22px;padding:20px 18px;
+  font-family:var(--serif);font-size:1.3rem;line-height:2.1;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 12px 30px rgba(0,0,0,.3)}
+.word{white-space:nowrap}
+.p.post{margin-left:-.2em}
+.p.pre{margin-right:-.2em}
+.tile{position:relative;display:inline-block;padding:0 .24em;line-height:1.4;font:inherit;color:transparent;user-select:none;-webkit-user-select:none;
+  background:linear-gradient(135deg,var(--stone1),var(--stone2));
+  clip-path:polygon(.36em 0,calc(100% - .36em) 0,100% .36em,100% calc(100% - .36em),calc(100% - .36em) 100%,.36em 100%,0 calc(100% - .36em),0 .36em);
+  transition:background .35s,color .35s}
+.tile::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(112deg,rgba(255,255,255,.24) 0 30%,transparent 30% 62%,rgba(0,0,0,.22) 62%);transition:opacity .3s}
+.tile::after{content:"";position:absolute;inset:-6px -2px}
+.tile:not(.open):active{filter:brightness(1.25)}
+.tile.open{background:rgba(255,255,255,.05);color:var(--ink);cursor:default}
+.tile.open::before{opacity:0}
+.tile.clue{color:var(--topaz);background:rgba(255,191,71,.14);text-shadow:0 0 14px rgba(255,191,71,.55)}
+.tile.clue::before{opacity:1;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.6) 50%,transparent 70%);animation:sweep 1s .35s ease-out both}
+@keyframes sweep{from{transform:translateX(-130%)}to{transform:translateX(130%)}}
+.tile.fresh{animation:polish .5s}
+@keyframes polish{0%{filter:brightness(2.2)}100%{filter:none}}
+.meter{margin:12px 2px 4px;color:var(--mute);font-size:.95rem}
+.bar{height:6px;border-radius:6px;background:rgba(255,255,255,.1);margin-top:7px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--amethyst),var(--topaz));transition:width .35s}
+#panel{margin-top:14px}
+.ref{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.seg{border-radius:14px;padding:7px 10px 8px;background:rgba(255,255,255,.05);border:1.5px solid transparent;min-width:0}
+.seg small{display:block;color:var(--mute);font-size:.78rem}
+.seg b{display:block;font-family:var(--serif);font-size:1.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg.done{background:rgba(46,211,154,.13);border-color:rgba(46,211,154,.5)}
+.seg.cur{border-color:var(--topaz);background:rgba(255,191,71,.1);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 4px rgba(255,191,71,.18)}}
+.q{display:flex;align-items:center;justify-content:space-between;margin:0 2px 12px}
+.q span:first-child{font-family:var(--serif);font-size:1.3rem;font-weight:700}
+.worth{display:flex;align-items:center;gap:6px;font-weight:800;color:var(--topaz);background:rgba(255,191,71,.12);padding:5px 12px 5px 8px;border-radius:999px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{min-height:70px;padding:10px;border-radius:18px;font-size:1.12rem;font-weight:700;line-height:1.2;
+  background:linear-gradient(180deg,#43357a,#33266a);border:1.5px solid var(--line);box-shadow:0 5px 0 #17102c;
+  transition:transform .08s,box-shadow .08s,opacity .2s}
+.opt.num{font-size:1.7rem;font-family:var(--serif)}
+.opt:active{transform:translateY(3px);box-shadow:0 2px 0 #17102c}
+.opt.ok{background:linear-gradient(180deg,#46eab5,#1fb583);color:#05281c;border-color:#b6ffe6}
+.opt.no{background:linear-gradient(180deg,#ff8196,#e63e5f);color:#34060f;border-color:#ffc0cb;animation:shake .4s}
+.opt.dim{opacity:.4}
+@keyframes shake{20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
+.done-card{border-radius:22px;padding:18px;border:1.5px solid var(--line);background:linear-gradient(160deg,var(--panel2),var(--panel));animation:rise .4s}
+@keyframes rise{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+.done-card.ok{border-color:rgba(46,211,154,.7)}
+.done-card.bad{border-color:rgba(255,93,120,.6)}
+.done-card .msg{color:var(--mute);font-size:1rem}
+.done-card .big{font-family:var(--serif);font-size:2rem;font-weight:700;margin:2px 0 10px}
+.rows{margin:0 0 16px;display:grid;gap:6px;font-size:1rem}
+.rows div{display:flex;justify-content:space-between;border-bottom:1px dashed rgba(255,255,255,.14);padding-bottom:6px}
+.rows b{font-variant-numeric:tabular-nums}
+
+/* results */
+.res{text-align:center;padding-top:10px}
+.res h2{font-family:var(--serif);font-size:1.9rem;line-height:1.15;margin-top:12px}
+.res .big{font-size:3.2rem;font-weight:800;font-variant-numeric:tabular-nums;margin:10px 0 0;line-height:1}
+.res .sub{color:var(--mute);margin:4px 0 14px}
+.bigstars{display:flex;justify-content:center;gap:12px;margin:8px 0}
+.bigstars .gem{animation:starin .6s both}
+.bigstars .gem:nth-child(2){animation-delay:.2s}
+.bigstars .gem:nth-child(3){animation-delay:.4s}
+@keyframes starin{from{transform:scale(.2) rotate(-30deg);opacity:0}to{transform:none;opacity:1}}
+.unlock{margin:14px 0;padding:14px;border-radius:18px;background:rgba(255,191,71,.12);border:1.5px solid rgba(255,191,71,.6);font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:12px}
+.review{text-align:left;margin-top:18px}
+.review h3{font-family:var(--serif);font-size:1.2rem;margin-bottom:10px}
+.rv{padding:14px;border-radius:16px;background:rgba(255,255,255,.05);border:1.5px solid var(--line);margin-bottom:10px}
+.rv b{display:block;color:var(--topaz);margin-bottom:4px}
+.rv p{font-family:var(--serif);font-size:1.08rem;line-height:1.6}
+.btns{display:grid;gap:12px;margin-top:18px}
+
+/* overlays */
+#fx{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.spark{position:absolute;width:11px;height:11px;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.float{position:absolute;font-weight:800;font-size:1.35rem;color:var(--topaz);text-shadow:0 2px 8px rgba(0,0,0,.6)}
+#toast{position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translate(-50%,140%);z-index:60;
+  display:flex;align-items:center;gap:12px;padding:12px 18px 12px 14px;border-radius:18px;background:#fff;color:#241a47;font-weight:700;
+  box-shadow:0 12px 30px rgba(0,0,0,.45);transition:transform .45s cubic-bezier(.2,.9,.3,1.2),opacity .3s,visibility 0s .45s;max-width:92vw;
+  opacity:0;visibility:hidden}
+#toast.show{transform:translate(-50%,0);opacity:1;visibility:visible;transition:transform .45s cubic-bezier(.2,.9,.3,1.2),opacity .3s,visibility 0s}
+#toast small{display:block;font-weight:500;color:#5b4f7d}
+.modal{position:fixed;inset:0;z-index:70;background:rgba(10,5,24,.72);display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{width:100%;max-width:480px;background:linear-gradient(160deg,#3a2c72,#2b1f52);border-radius:26px 26px 0 0;border:1.5px solid var(--line);border-bottom:0;
+  padding:22px 20px max(22px,env(safe-area-inset-bottom));animation:up .3s cubic-bezier(.2,.9,.3,1)}
+@keyframes up{from{transform:translateY(40px)}to{transform:none}}
+.sheet h2{font-family:var(--serif);font-size:1.5rem;margin-bottom:12px}
+.sheet ol{margin:0 0 18px;padding-left:22px;font-size:1.05rem;line-height:1.5}
+.sheet li{margin-bottom:8px}
+.sheet .btns{margin-top:6px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+@media (max-width:360px){.slab{font-size:1.18rem}.hero h1{font-size:2rem}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="fx"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+
+/* ---------- data ---------- */
+var DATA = {"translation": "New World Translation of the Holy Scriptures", "levels": {"1": [{"book": "John", "ch": 3, "v": 16, "text": "“For God loved the world so much that he gave his only-begotten Son, so that everyone exercising faith in him might not be destroyed but have everlasting life.", "key": "only-begotten Son"}, {"book": "Matthew", "ch": 6, "v": 33, "text": "“Keep on, then, seeking first the Kingdom and his righteousness, and all these other things will be added to you.", "key": "seeking first the Kingdom"}, {"book": "Acts", "ch": 20, "v": 35, "text": "I have shown you in all things that by working hard in this way, you must assist those who are weak and must keep in mind the words of the Lord Jesus, when he himself said: ‘There is more happiness in giving than there is in receiving.’”", "key": "more happiness in giving"}, {"book": "Matthew", "ch": 28, "v": 19, "text": "Go, therefore, and make disciples of people of all the nations, baptizing them in the name of the Father and of the Son and of the holy spirit,", "key": "make disciples of people"}, {"book": "James", "ch": 4, "v": 8, "text": "Draw close to God, and he will draw close to you. Cleanse your hands, you sinners, and purify your hearts, you indecisive ones.", "key": "Draw close to God"}, {"book": "Revelation", "ch": 21, "v": 4, "text": "And he will wipe out every tear from their eyes, and death will be no more, neither will mourning nor outcry nor pain be anymore. The former things have passed away.”", "key": "wipe out every tear"}, {"book": "Isaiah", "ch": 48, "v": 17, "text": "This is what Jehovah says, your Repurchaser, the Holy One of Israel: “I, Jehovah, am your God, The One teaching you to benefit yourself, The One guiding you in the way you should walk.", "key": "Repurchaser, the Holy One"}, {"book": "John", "ch": 17, "v": 3, "text": "This means everlasting life, their coming to know you, the only true God, and the one whom you sent, Jesus Christ.", "key": "only true God"}, {"book": "Matthew", "ch": 22, "v": 37, "text": "He said to him: “‘You must love Jehovah your God with your whole heart and with your whole soul and with your whole mind.’", "key": "your whole heart"}, {"book": "Matthew", "ch": 24, "v": 14, "text": "And this good news of the Kingdom will be preached in all the inhabited earth for a witness to all the nations, and then the end will come.", "key": "this good news"}, {"book": "Proverbs", "ch": 27, "v": 11, "text": "Be wise, my son, and make my heart rejoice, So that I can make a reply to him who taunts me.", "key": "make my heart rejoice"}, {"book": "2 Timothy", "ch": 3, "v": 1, "text": "But know this, that in the last days critical times hard to deal with will be here.", "key": "critical times hard to"}], "2": [{"book": "Philippians", "ch": 4, "v": 6, "text": "Do not be anxious over anything, but in everything by prayer and supplication along with thanksgiving, let your petitions be made known to God;", "key": "by prayer and supplication"}, {"book": "Romans", "ch": 12, "v": 1, "text": "Therefore, I appeal to you by the compassions of God, brothers, to present your bodies as a living sacrifice, holy and acceptable to God, a sacred service with your power of reason.", "key": "a living sacrifice"}, {"book": "Hebrews", "ch": 10, "v": 25, "text": "not forsaking our meeting together, as some have the custom, but encouraging one another, and all the more so as you see the day drawing near.", "key": "forsaking our meeting together"}, {"book": "Hebrews", "ch": 11, "v": 6, "text": "Moreover, without faith it is impossible to please God well, for whoever approaches God must believe that he is and that he becomes the rewarder of those earnestly seeking him.", "key": "impossible to please God"}, {"book": "Proverbs", "ch": 3, "v": 5, "text": "Trust in Jehovah with all your heart, And do not rely on your own understanding.", "key": "do not rely on"}, {"book": "John", "ch": 13, "v": 35, "text": "By this all will know that you are my disciples—if you have love among yourselves.”", "key": "you are my disciples"}, {"book": "Colossians", "ch": 3, "v": 13, "text": "Continue putting up with one another and forgiving one another freely even if anyone has a cause for complaint against another. Just as Jehovah freely forgave you, you must also do the same.", "key": "forgiving one another freely"}, {"book": "Psalms", "ch": 86, "v": 5, "text": "For you, O Jehovah, are good and ready to forgive; You abound in loyal love for all those who call on you.", "key": "ready to forgive"}, {"book": "Romans", "ch": 15, "v": 4, "text": "For all the things that were written beforehand were written for our instruction, so that through our endurance and through the comfort from the Scriptures we might have hope.", "key": "written for our instruction"}, {"book": "Psalms", "ch": 103, "v": 14, "text": "For he well knows how we are formed, Remembering that we are dust.", "key": "how we are formed"}, {"book": "2 Timothy", "ch": 3, "v": 16, "text": "All Scripture is inspired of God and beneficial for teaching, for reproving, for setting things straight, for disciplining in righteousness,", "key": "inspired of God"}, {"book": "Hebrews", "ch": 13, "v": 5, "text": "Let your way of life be free of the love of money, while you are content with the present things. For he has said: “I will never leave you, and I will never abandon you.”", "key": "never leave you"}], "3": [{"book": "Proverbs", "ch": 17, "v": 17, "text": "A true friend shows love at all times And is a brother who is born for times of distress.", "key": "brother who is born"}, {"book": "Psalms", "ch": 133, "v": 1, "text": "Look! How good and how pleasant it is For brothers to dwell together in unity!", "key": "dwell together in unity"}, {"book": "Psalms", "ch": 55, "v": 22, "text": "Throw your burden on Jehovah, And he will sustain you. Never will he allow the righteous one to fall.", "key": "Throw your burden"}, {"book": "Ephesians", "ch": 5, "v": 16, "text": "making the best use of your time, because the days are wicked.", "key": "making the best use"}, {"book": "James", "ch": 1, "v": 5, "text": "So if any one of you is lacking in wisdom, let him keep asking God, for he gives generously to all and without reproaching, and it will be given him.", "key": "lacking in wisdom"}, {"book": "Matthew", "ch": 6, "v": 9, "text": "“You must pray, then, this way: “‘Our Father in the heavens, let your name be sanctified.", "key": "Father in the heavens"}, {"book": "Hebrews", "ch": 4, "v": 12, "text": "For the word of God is alive and exerts power and is sharper than any two-edged sword and pierces even to the dividing of soul and spirit, and of joints from the marrow, and is able to discern thoughts and intentions of the heart.", "key": "two-edged sword"}, {"book": "Acts", "ch": 3, "v": 19, "text": "“Repent, therefore, and turn around so as to get your sins blotted out, so that seasons of refreshing may come from Jehovah himself", "key": "seasons of refreshing"}, {"book": "1 Thessalonians", "ch": 5, "v": 14, "text": "On the other hand, we urge you, brothers, to warn the disorderly, speak consolingly to those who are depressed, support the weak, be patient toward all.", "key": "warn the disorderly"}, {"book": "Ephesians", "ch": 4, "v": 26, "text": "Be wrathful, but do not sin; do not let the sun set while you are still angry;", "key": "let the sun set"}, {"book": "Philippians", "ch": 4, "v": 13, "text": "For all things I have the strength through the one who gives me power.", "key": "I have the strength"}, {"book": "1 Peter", "ch": 5, "v": 8, "text": "Keep your senses, be watchful! Your adversary, the Devil, walks about like a roaring lion, seeking to devour someone.", "key": "like a roaring lion"}]}};
+
+var DATA_AF = {"translation": "Nuwe Wêreld-vertaling", "levels": {"1": [{"book": "John", "ch": 3, "v": 16, "text": "“Want God het die wêreld so liefgehad dat hy sy eniggebore Seun gegee het, sodat elkeen wat geloof in hom beoefen, nie vernietig sal word nie, maar die ewige lewe kan hê.", "key": "eniggebore Seun"}, {"book": "Matthew", "ch": 6, "v": 33, "text": "“Hou dan aan om eers die Koninkryk en sy regverdigheid te soek, en al hierdie ander dinge sal vir julle bygevoeg word.", "key": "eers die Koninkryk"}, {"book": "Acts", "ch": 20, "v": 35, "text": "Ek het in alles vir julle gewys dat julle deur hard te werk die swakkes moet help en die woorde van die Here Jesus moet onthou, toe hy self gesê het: ‘Dit maak ’n mens gelukkiger om te gee as om te ontvang.’”", "key": "gelukkiger om te gee"}, {"book": "Matthew", "ch": 28, "v": 19, "text": "Gaan dus en maak dissipels van mense van al die nasies, en doop hulle in die naam van die Vader en van die Seun en van die heilige gees,", "key": "maak dissipels van mense"}, {"book": "James", "ch": 4, "v": 8, "text": "Kom nader aan God, en hy sal nader aan julle kom. Reinig julle hande, julle sondaars, en suiwer julle harte, julle besluiteloses.", "key": "Kom nader aan God"}, {"book": "Revelation", "ch": 21, "v": 4, "text": "En God sal elke traan van hulle oë afvee, en die dood sal nie meer daar wees nie. Daar sal geen getreur, geen gehuil en geen pyn meer wees nie. Die vorige dinge is verby.”", "key": "elke traan van hulle"}, {"book": "Isaiah", "ch": 48, "v": 17, "text": "Dít is wat Jehovah sê, jou Terugkoper, die Heilige van Israel: “Ek, Jehovah, is jou God, die Een wat jou leer om jouself te bevoordeel, die Een wat jou lei op die weg wat jy moet volg.", "key": "Terugkoper, die Heilige"}, {"book": "John", "ch": 17, "v": 3, "text": "Om die ewige lewe te ontvang, moet hulle u leer ken, die enigste ware God, en ook die een wat u gestuur het, Jesus Christus.", "key": "enigste ware God"}, {"book": "Matthew", "ch": 22, "v": 37, "text": "Hy het vir hom gesê: “‘Jy moet Jehovah jou God liefhê met jou hele hart en met jou hele siel en met jou hele verstand.’", "key": "jou hele hart"}, {"book": "Matthew", "ch": 24, "v": 14, "text": "Hierdie goeie nuus van die Koninkryk sal oor die hele bewoonde aarde verkondig word as ’n getuienis vir al die nasies, en dan sal die einde kom.", "key": "Hierdie goeie nuus"}, {"book": "Proverbs", "ch": 27, "v": 11, "text": "Wees wys, my seun, en maak my hart bly, sodat ek hom wat my uittart, ’n antwoord kan gee.", "key": "maak my hart bly"}, {"book": "2 Timothy", "ch": 3, "v": 1, "text": "Maar weet dat daar in die laaste dae swaar tye sal wees wat moeilik is om deur te kom.", "key": "swaar tye sal wees"}], "2": [{"book": "Philippians", "ch": 4, "v": 6, "text": "Moet oor niks bekommerd wees nie, maar vra God in elke situasie om julle te help deur tot hom te bid, hom te smeek en hom te dank.", "key": "deur tot hom te bid"}, {"book": "Romans", "ch": 12, "v": 1, "text": "Broers, aangesien God genadig teenoor ons is, smeek ek julle om julle liggame aan te bied as ’n offerande wat lewend, heilig en vir God aanvaarbaar is. So doen julle heilige diens met julle denkvermoë.", "key": "offerande wat lewend"}, {"book": "Hebrews", "ch": 10, "v": 25, "text": "Ons moenie ons vergaderingbywoning verwaarloos, soos party die gewoonte het nie, maar ons moet mekaar aanmoedig, en ons moet dit al hoe meer doen terwyl ons die dag sien nader kom.", "key": "ons vergaderingbywoning verwaarloos"}, {"book": "Hebrews", "ch": 11, "v": 6, "text": "Wat meer is, sonder geloof is dit onmoontlik om God se goedkeuring te verkry, want as iemand God wil nader, moet hy glo dat hy bestaan en dat hy die beloner word van dié wat hom ernstig soek.", "key": "onmoontlik om God se goedkeuring"}, {"book": "Proverbs", "ch": 3, "v": 5, "text": "Vertrou op Jehovah met jou hele hart, en moenie op jou eie begrip staatmaak nie.", "key": "moenie op jou eie begrip"}, {"book": "John", "ch": 13, "v": 35, "text": "So sal almal weet dat julle my dissipels is – as julle liefde vir mekaar het.”", "key": "julle my dissipels is"}, {"book": "Colossians", "ch": 3, "v": 13, "text": "Hou aan om mekaar te verdra en mekaar vryelik te vergewe, selfs al het iemand ’n rede om oor iemand anders te kla. Net soos Jehovah julle vryelik vergewe het, so moet julle ook vergewe.", "key": "mekaar vryelik te vergewe"}, {"book": "Psalms", "ch": 86, "v": 5, "text": "Want u, o Jehovah, is goed en vergewe vryelik. U is vol lojale liefde vir almal wat u aanroep.", "key": "vergewe vryelik"}, {"book": "Romans", "ch": 15, "v": 4, "text": "Want alles wat vroeër geskryf is, is geskryf sodat ons daaruit kan leer, sodat ons deur ons volharding en deur die vertroosting uit die Skrif hoop kan hê.", "key": "daaruit kan leer"}, {"book": "Psalms", "ch": 103, "v": 14, "text": "Want hy weet goed hoe ons gevorm is, en hy hou in gedagte dat ons stof is.", "key": "hoe ons gevorm is"}, {"book": "2 Timothy", "ch": 3, "v": 16, "text": "Die hele Skrif is deur God geïnspireer en is nuttig om te onderrig, om tereg te wys, om dinge reg te stel, om in regverdigheid te dissiplineer,", "key": "deur God geïnspireer"}, {"book": "Hebrews", "ch": 13, "v": 5, "text": "Julle lewenswyse moet vry wees van die liefde vir geld, terwyl julle tevrede is met die dinge wat julle nou het. Want hy het gesê: “Ek sal jou nooit verlaat nie en jou nooit in die steek laat nie.”", "key": "jou nooit verlaat nie"}], "3": [{"book": "Proverbs", "ch": 17, "v": 17, "text": "’n Ware vriend betoon altyd liefde en is ’n broer gedurende moeilike tye.", "key": "broer gedurende moeilike tye"}, {"book": "Psalms", "ch": 133, "v": 1, "text": "Kyk! Hoe goed en hoe aangenaam is dit as broers in eenheid bymekaar woon!", "key": "in eenheid bymekaar woon"}, {"book": "Psalms", "ch": 55, "v": 22, "text": "Gee jou las vir Jehovah, en hy sal jou ondersteun. Hy sal die regverdige nooit laat val nie.", "key": "Gee jou las"}, {"book": "Ephesians", "ch": 5, "v": 16, "text": "en maak die beste gebruik van julle tyd, want die dae is goddeloos.", "key": "maak die beste gebruik"}, {"book": "James", "ch": 1, "v": 5, "text": "As een van julle dan wysheid nodig het, moet hy aanhou om God te vra, want hy gee oorvloedig aan almal sonder om te verwyt, en hy sal wysheid ontvang.", "key": "wysheid nodig het"}, {"book": "Matthew", "ch": 6, "v": 9, "text": "“Julle moet dan só bid: “‘Ons Vader in die hemel, laat u naam geheilig word.", "key": "Ons Vader in die hemel"}, {"book": "Hebrews", "ch": 4, "v": 12, "text": "Want die woord van God is lewend en kragtig en skerper as enige tweesnydende swaard. Dit dring diep in ’n mens in en skei siel en gees, en dit skei die gewrigte van die murg, en dit kan gedagtes en bedoelings van die hart openbaar.", "key": "tweesnydende swaard"}, {"book": "Acts", "ch": 3, "v": 19, "text": "“Toon dus berou en draai om sodat julle sondes uitgewis kan word. Dan sal Jehovah self tye van verfrissing bring", "key": "tye van verfrissing"}, {"book": "1 Thessalonians", "ch": 5, "v": 14, "text": "Aan die ander kant spoor ons julle aan, broers: Waarsku dié wat ongehoorsaam is, praat vertroostend met dié wat terneergedruk is, ondersteun dié wat swak is, wees geduldig met almal.", "key": "Waarsku dié wat ongehoorsaam is"}, {"book": "Ephesians", "ch": 4, "v": 26, "text": "Wees kwaad, maar moenie sondig nie. Moenie toelaat dat die son ondergaan terwyl julle nog kwaad is nie,", "key": "son ondergaan"}, {"book": "Philippians", "ch": 4, "v": 13, "text": "Vir alles is ek sterk genoeg deur hom wat my krag gee.", "key": "sterk genoeg deur hom"}, {"book": "1 Peter", "ch": 5, "v": 8, "text": "Bly helder van verstand, bly wakker! Julle teenstander, die Duiwel, loop rond soos ’n brullende leeu, op soek na iemand om te verslind.", "key": "brullende leeu"}]}};
+var BOOKS_AF=["Genesis", "Eksodus", "Levitikus", "Numeri", "Deuteronomium", "Josua", "Rigters", "Rut", "1 Samuel", "2 Samuel", "1 Konings", "2 Konings", "1 Kronieke", "2 Kronieke", "Esra", "Nehemia", "Ester", "Job", "Psalms", "Spreuke", "Prediker", "Hooglied van Salomo", "Jesaja", "Jeremia", "Klaagliedere", "Esegiël", "Daniël", "Hosea", "Joël", "Amos", "Obadja", "Jona", "Miga", "Nahum", "Habakuk", "Sefanja", "Haggai", "Sagaria", "Maleagi", "Matteus", "Markus", "Lukas", "Johannes", "Handelinge", "Romeine", "1 Korintiërs", "2 Korintiërs", "Galasiërs", "Efesiërs", "Filippense", "Kolossense", "1 Tessalonisense", "2 Tessalonisense", "1 Timoteus", "2 Timoteus", "Titus", "Filemon", "Hebreërs", "Jakobus", "1 Petrus", "2 Petrus", "1 Johannes", "2 Johannes", "3 Johannes", "Judas", "Openbaring"];
+var BOOKS=["Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes","Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekiel","Daniel","Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk","Zephaniah","Haggai","Zechariah","Malachi","Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians","Galatians","Ephesians","Philippians","Colossians","1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews","James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation"];
+var CH=[50,40,27,36,34,24,21,4,31,24,22,25,29,36,10,13,10,42,150,31,12,8,66,52,5,48,12,14,3,9,1,4,7,3,3,3,2,14,4,28,16,24,21,28,16,16,13,6,6,4,4,5,3,6,4,3,1,13,5,5,3,5,1,1,1,22];
+var GROUPS=[[0,4],[5,16],[17,21],[22,38],[39,43],[44,65]];
+var VCOUNT={"John 3":36,"Matthew 6":34,"Acts 20":38,"Matthew 28":20,"James 4":17,"Revelation 21":27,"Isaiah 48":22,"John 17":26,"Matthew 22":46,"Matthew 24":51,"Proverbs 27":27,"2 Timothy 3":17,"Philippians 4":23,"Romans 12":21,"Hebrews 10":39,"Hebrews 11":40,"Proverbs 3":35,"John 13":38,"Colossians 3":25,"Psalms 86":17,"Romans 15":33,"Psalms 103":22,"Hebrews 13":25,"Proverbs 17":28,"Psalms 133":3,"Psalms 55":23,"Ephesians 5":33,"James 1":27,"Hebrews 4":16,"Acts 3":26,"1 Thessalonians 5":28,"Ephesians 4":32,"1 Peter 5":14};
+var LV=[
+  {n:1,name:"Quartz",sub:"Well-known verses",color:"#d9c9ff"},
+  {n:2,name:"Sapphire",sub:"Familiar verses",color:"#5b9bff"},
+  {n:3,name:"Diamond",sub:"The challenge",color:"#8fe9ff"}
+];
+var BADGES=[
+  {id:"first10",name:"First ten",desc:"Find 10 verses",color:"#2ed39a",test:function(){return P.totalCorrect>=10;}},
+  {id:"streak5",name:"Hot streak",desc:"5 verses in a row",color:"#ffbf47",test:function(){return P.bestStreak>=5;}},
+  {id:"flawless",name:"Flawless",desc:"10 out of 10 in one run",color:"#ff5d78",test:function(){return !!P.flawless;}},
+  {id:"days7",name:"Seven days",desc:"Play 7 days in a row",color:"#b184ff",test:function(){return P.dayStreak>=7;}},
+  {id:"sapphire",name:"Sapphire",desc:"Unlock level 2",color:"#5b9bff",test:function(){return !!P.unlocked[2];}},
+  {id:"diamond",name:"Diamond",desc:"Unlock level 3",color:"#8fe9ff",test:function(){return !!P.unlocked[3];}}
+];
+var ROUNDS=10, PASS=7, GEMS=5;
+
+/* ---------- helpers ---------- */
+function $(s,r){return (r||document).querySelector(s);}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function pick(a,n){return shuffle(a).slice(0,n);}
+function rint(lo,hi){return lo+Math.floor(Math.random()*(hi-lo+1));}
+function fmt(n){return Number(n).toLocaleString("en-US");}
+function refName(b){return b==="Psalms"?"Psalm":b;}
+function bname(i){return (P.lang==="af"?BOOKS_AF:BOOKS)[i];}
+function refOf(v){return refName(bname(BOOKS.indexOf(v.book)))+" "+v.ch+":"+v.v;}
+function reduced(){return window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;}
+function normWord(s){return s.toLowerCase().replace(/[^\p{L}\p{N}]/gu,"");}
+
+function gem(c,size,cls){
+  size=size||28;
+  return '<svg class="gem '+(cls||'')+'" width="'+size+'" height="'+Math.round(size*0.9)+'" viewBox="0 0 100 90" aria-hidden="true">'+
+  '<polygon points="20,8 80,8 98,34 50,88 2,34" fill="'+c+'"/>'+
+  '<polygon points="20,8 80,8 66,34 34,34" fill="#fff" fill-opacity=".12"/>'+
+  '<polygon points="20,8 50,8 34,34 2,34" fill="#fff" fill-opacity=".30"/>'+
+  '<polygon points="50,8 80,8 98,34 66,34" fill="#fff" fill-opacity=".10"/>'+
+  '<polygon points="34,34 66,34 50,88" fill="#fff" fill-opacity=".24"/>'+
+  '<polygon points="2,34 34,34 50,88" fill="#000" fill-opacity=".18"/>'+
+  '<polygon points="66,34 98,34 50,88" fill="#000" fill-opacity=".32"/>'+
+  '</svg>';
+}
+function bigLogo(){
+  return '<svg class="logo" width="120" height="108" viewBox="0 0 100 90" aria-hidden="true">'+
+  '<polygon points="20,8 80,8 98,34 50,88 2,34" fill="#b184ff"/>'+
+  '<polygon points="20,8 80,8 66,34 34,34" fill="#fff" fill-opacity=".14"/>'+
+  '<polygon points="20,8 50,8 34,34 2,34" fill="#fff" fill-opacity=".34"/>'+
+  '<polygon points="50,8 80,8 98,34 66,34" fill="#5b9bff" fill-opacity=".45"/>'+
+  '<polygon points="34,34 66,34 50,88" fill="#fff" fill-opacity=".26"/>'+
+  '<polygon points="2,34 34,34 50,88" fill="#000" fill-opacity=".2"/>'+
+  '<polygon points="66,34 98,34 50,88" fill="#000" fill-opacity=".34"/>'+
+  '<g class="glint" style="transform-box:fill-box"><path d="M30 14 L33 22 L41 25 L33 28 L30 36 L27 28 L19 25 L27 22Z" fill="#fff"/></g>'+
+  '</svg>';
+}
+var ICON={
+  x:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  help:'<svg viewBox="0 0 24 24"><path d="M9.2 9a3 3 0 1 1 4.3 2.7c-.9.5-1.5 1.1-1.5 2.3"/><path d="M12 17.6v.1"/></svg>',
+  sndOn:'<svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  sndOff:'<svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>',
+  lock:'<svg class="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'
+};
+
+/* ---------- save ---------- */
+var KEY="scriptureGems.v1";
+function defaults(){return {unlocked:{1:true,2:false,3:false},best:{},stars:{},totalCorrect:0,bestStreak:0,dayStreak:0,lastDay:"",badges:{},flawless:false,seenHelp:false,sound:true,runs:0,lang:"en"};}
+function load(){
+  var d=defaults();
+  try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);for(var k in o){d[k]=o[k];}}}catch(e){}
+  d.unlocked=d.unlocked||{1:true};d.unlocked[1]=true;d.best=d.best||{};d.stars=d.stars||{};d.badges=d.badges||{};
+  return d;
+}
+var P=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}}
+function dayKey(d){return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+function touchDay(){
+  var now=new Date(),today=dayKey(now);
+  if(P.lastDay===today)return;
+  var y=new Date(now.getFullYear(),now.getMonth(),now.getDate()-1);
+  P.dayStreak=(P.lastDay===dayKey(y))?P.dayStreak+1:1;
+  P.lastDay=today;
+}
+function currentDayStreak(){
+  var now=new Date(),today=dayKey(now);
+  var y=new Date(now.getFullYear(),now.getMonth(),now.getDate()-1);
+  return (P.lastDay===today||P.lastDay===dayKey(y))?P.dayStreak:0;
+}
+function checkBadges(){
+  var fresh=[];
+  BADGES.forEach(function(b){if(!P.badges[b.id]&&b.test()){P.badges[b.id]=Date.now();fresh.push(b);}});
+  return fresh;
+}
+
+/* ---------- sound & fx ---------- */
+var AC=null;
+function tone(f,d,type,v,delay){
+  if(!P.sound)return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==="suspended")AC.resume();
+    var t=AC.currentTime+(delay||0),o=AC.createOscillator(),g=AC.createGain();
+    o.type=type||"sine";o.frequency.value=f;
+    g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(v||0.1,t+0.015);g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+    o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d+0.03);
+  }catch(e){}
+}
+var sfx={
+  tick:function(){tone(880,0.08,"triangle",0.06);},
+  good:function(){tone(660,0.2,"sine",0.12);tone(990,0.32,"sine",0.1,0.09);},
+  bad:function(){tone(190,0.34,"sawtooth",0.06);tone(140,0.34,"sawtooth",0.05,0.1);},
+  win:function(){[523,659,784,1047].forEach(function(f,i){tone(f,0.45,"sine",0.1,i*0.1);});},
+  badge:function(){[784,988,1175].forEach(function(f,i){tone(f,0.4,"triangle",0.09,i*0.12);});}
+};
+function vib(ms){try{if(navigator.vibrate)navigator.vibrate(ms);}catch(e){}}
+function burst(el,color,n){
+  if(reduced()||!el||!el.getBoundingClientRect||!el.animate)return;
+  var r=el.getBoundingClientRect(),fx=$("#fx"),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  for(var i=0;i<(n||12);i++){
+    var s=document.createElement("i");s.className="spark";
+    s.style.left=cx+"px";s.style.top=cy+"px";
+    s.style.background=color;
+    fx.appendChild(s);
+    var a=Math.random()*Math.PI*2,d=40+Math.random()*70;
+    var an=s.animate([{transform:"translate(-50%,-50%) scale(1)",opacity:1},
+      {transform:"translate(calc(-50% + "+Math.cos(a)*d+"px),calc(-50% + "+(Math.sin(a)*d-20)+"px)) scale(.2) rotate(200deg)",opacity:0}],
+      {duration:650+Math.random()*250,easing:"cubic-bezier(.2,.8,.3,1)"});
+    (function(node){an.onfinish=function(){if(node.parentNode)node.parentNode.removeChild(node);};})(s);
+  }
+}
+function floatText(el,text){
+  if(reduced()||!el||!el.animate)return;
+  var r=el.getBoundingClientRect(),fx=$("#fx"),f=document.createElement("div");
+  f.className="float";f.textContent=text;f.style.left=(r.left+r.width/2-24)+"px";f.style.top=(r.top+4)+"px";
+  fx.appendChild(f);
+  var an=f.animate([{transform:"translateY(0)",opacity:1},{transform:"translateY(-60px)",opacity:0}],{duration:900,easing:"ease-out"});
+  an.onfinish=function(){if(f.parentNode)f.parentNode.removeChild(f);};
+}
+var toastTimer=null,toastQueue=[];
+function toast(b){
+  toastQueue.push(b);if(!toastTimer)nextToast();
+}
+function nextToast(){
+  var b=toastQueue.shift(),t=$("#toast");
+  if(!b){toastTimer=null;return;}
+  t.innerHTML=gem(b.color,34)+'<div>New gem: '+esc(b.name)+'<small>'+esc(b.desc)+'</small></div>';
+  t.classList.add("show");sfx.badge();
+  toastTimer=setTimeout(function(){t.classList.remove("show");toastTimer=setTimeout(nextToast,500);},2800);
+}
+function modal(html){
+  var m=document.createElement("div");m.className="modal";
+  m.innerHTML='<div class="sheet" role="dialog" aria-modal="true">'+html+'</div>';
+  document.body.appendChild(m);
+  var first=$("button",m);if(first)first.focus();
+  return m;
+}
+function closeModal(m){if(m&&m.parentNode)m.parentNode.removeChild(m);}
+
+/* ---------- state ---------- */
+var S={screen:"home",run:null,round:null};
+var app=$("#app");
+var VERSES=[];
+function loadVerses(){
+  var src=P.lang==="af"?DATA_AF:DATA;
+  VERSES.length=0;
+  [1,2,3].forEach(function(n){
+    (src.levels[n]||[]).forEach(function(v){
+      var b=v.book==="Psalm"?"Psalms":v.book;
+      VERSES.push({level:n,book:b,ch:v.ch,v:v.v,text:v.text,key:v.key||""});
+    });
+  });
+}
+loadVerses();
+
+/* ---------- verse parsing ---------- */
+function parseVerse(v){
+  var toks=v.text.replace(/—/g,"— ").split(/\s+/).filter(Boolean).map(function(t){
+    var m=t.match(/^([^\p{L}\p{N}]*)(.*?)([^\p{L}\p{N}]*)$/u);
+    return {pre:m[1],core:m[2],post:m[3],plain:!m[2]};
+  });
+  var keyToks=v.key.split(/\s+/).map(normWord).filter(Boolean),clue=[],i,k;
+  if(keyToks.length){
+    for(i=0;i+keyToks.length<=toks.length&&!clue.length;i++){
+      var ok=true;
+      for(k=0;k<keyToks.length;k++){if(toks[i+k].plain||normWord(toks[i+k].core)!==keyToks[k]){ok=false;break;}}
+      if(ok){for(k=0;k<keyToks.length;k++)clue.push(i+k);}
+    }
+  }
+  if(!clue.length){
+    var idx=toks.map(function(t,j){return j;}).filter(function(j){return !toks[j].plain;});
+    idx.sort(function(a,b){return toks[b].core.length-toks[a].core.length;});
+    clue=idx.slice(0,2);
+  }
+  return {toks:toks,clue:clue};
+}
+
+/* ---------- options ---------- */
+function groupOf(i){for(var g=0;g<GROUPS.length;g++){if(i>=GROUPS[g][0]&&i<=GROUPS[g][1])return g;}return 0;}
+function rangeIdx(g){var a=[];for(var i=GROUPS[g][0];i<=GROUPS[g][1];i++)a.push(i);return a;}
+function bookOptions(v,level){
+  var ci=BOOKS.indexOf(v.book),g=groupOf(ci),same=rangeIdx(g).filter(function(i){return i!==ci;}),d=[],others;
+  var otherG=GROUPS.map(function(_,i){return i;}).filter(function(i){return i!==g;});
+  if(level===1){
+    pick(otherG,3).forEach(function(gi){d.push(pick(rangeIdx(gi),1)[0]);});
+  }else if(level===2){
+    d=pick(same,2);d.push(pick(rangeIdx(pick(otherG,1)[0]),1)[0]);
+  }else{
+    d=pick(same,3);
+  }
+  while(d.length<3){var c=rint(0,65);if(c!==ci&&d.indexOf(c)<0)d.push(c);}
+  return shuffle([ci].concat(d)).map(function(i){return {label:bname(i),ok:i===ci};});
+}
+function numOptions(correct,lo,hi,count,span){
+  var a=Math.max(lo,correct-span),b=Math.min(hi,correct+span),pool=[],i;
+  for(i=a;i<=b;i++)if(i!==correct)pool.push(i);
+  if(pool.length<count-1){pool=[];for(i=lo;i<=hi;i++)if(i!==correct)pool.push(i);}
+  var chosen=pick(pool,count-1).concat([correct]);
+  chosen.sort(function(x,y){return x-y;});
+  return chosen.map(function(n){return {label:String(n),ok:n===correct};});
+}
+function buildOpts(v,step,level){
+  if(step===0)return bookOptions(v,level);
+  var ci=BOOKS.indexOf(v.book);
+  if(step===1){
+    var N=CH[ci];
+    return numOptions(v.ch,1,N,Math.min(4,N),level===1?N:(level===2?8:3));
+  }
+  var M=VCOUNT[v.book+" "+v.ch]||(v.v+10);
+  M=Math.max(M,v.v);
+  return numOptions(v.v,1,M,Math.min(4,M),level===1?M:(level===2?10:4));
+}
+
+/* ---------- home ---------- */
+function home(){
+  S.screen="home";S.run=null;S.round=null;
+  var ds=currentDayStreak();
+  var h='<div class="top"><div class="lang" role="group" aria-label="Verse language">'+
+        '<button data-l="en" class="'+(P.lang==="af"?"":"on")+'" aria-pressed="'+(P.lang==="af"?"false":"true")+'">English</button>'+
+        '<button data-l="af" class="'+(P.lang==="af"?"on":"")+'" aria-pressed="'+(P.lang==="af"?"true":"false")+'">Afrikaans</button></div>'+
+        '<div class="tr"><button class="icon-btn" id="snd" aria-label="'+(P.sound?"Turn sound off":"Turn sound on")+'">'+(P.sound?ICON.sndOn:ICON.sndOff)+'</button>'+
+        '<button class="icon-btn" id="help" aria-label="How to play">'+ICON.help+'</button></div></div>'+
+        '<div class="hero">'+bigLogo()+'<h1>Scripture Gems</h1><p>Reveal the verse. Find where it is.</p>'+
+        '<div class="chips"><div class="chip">'+gem("#ffbf47",22)+'<span>'+(ds>0?ds+(ds===1?" day":" days")+" in a row":"Play today to start a streak")+'</span></div>'+
+        '<div class="chip">'+gem("#2ed39a",22)+'<span>'+P.totalCorrect+' found</span></div></div></div>';
+  h+='<h2 class="sect">Choose a level</h2>';
+  LV.forEach(function(l){
+    var open=!!P.unlocked[l.n],st=P.stars[l.n]||0,best=P.best[l.n]||0,stars="";
+    for(var i=0;i<3;i++)stars+=gem(i<st?"#ffbf47":"#5a4d80",16);
+    h+='<button class="lvl" data-lv="'+l.n+'"'+(open?'':' disabled aria-disabled="true"')+'>'+
+       '<div class="gtile">'+(open?gem(l.color,44):ICON.lock)+'</div>'+
+       '<div class="info"><div class="nm">'+l.name+'</div><div class="sub">'+l.sub+'</div>'+
+       '<div class="meta">'+(open?'<span class="stars">'+stars+'</span><span>'+(best?"Best "+fmt(best):"Not played yet")+'</span>':
+          '<span>Get '+PASS+' of '+ROUNDS+' right on '+LV[l.n-2].name+'</span>')+'</div></div></button>';
+  });
+  h+='<h2 class="sect">Your gems</h2><div class="badges">';
+  BADGES.forEach(function(b){
+    var on=!!P.badges[b.id];
+    h+='<div class="badge'+(on?'':' off')+'"><div class="med">'+gem(b.color,32)+'</div><b>'+esc(b.name)+'</b><small>'+esc(b.desc)+'</small></div>';
+  });
+  h+='</div><p class="foot">Verses: '+(P.lang==="af"?"Nuwe Wêreld-vertaling":"New World Translation of the Holy Scriptures")+'.<br>Made for personal use.</p>';
+  app.innerHTML=h;
+  $$(".lang button").forEach(function(b){b.onclick=function(){
+    if(P.lang===b.dataset.l)return;
+    P.lang=b.dataset.l;save();loadVerses();home();
+  };});
+  $("#snd").onclick=function(){P.sound=!P.sound;save();if(P.sound)sfx.tick();home();};
+  $("#help").onclick=showHelp;
+  $$(".lvl:not([disabled])").forEach(function(b){b.onclick=function(){startRun(+b.dataset.lv);};});
+  window.scrollTo(0,0);
+  if(!P.seenHelp){P.seenHelp=true;save();showHelp();}
+}
+function showHelp(){
+  var m=modal('<h2>How to play</h2><ol>'+
+    '<li>A verse appears with its words hidden as stones. A few clue words are already polished.</li>'+
+    '<li>Tap any stone to polish that word. The more you reveal, the fewer points you earn.</li>'+
+    '<li>Pick the book, then the chapter, then the verse.</li>'+
+    '<li>A wrong pick costs a gem, and a verse never costs more than one. Miss the book and you can still find the chapter and verse for half points. You have '+GEMS+' gems for each run of '+ROUNDS+' verses.</li>'+
+    '<li>Get '+PASS+' of '+ROUNDS+' right to unlock the next level.</li></ol>'+
+    '<div class="btns"><button class="primary" id="ok">Got it</button></div>');
+  $("#ok",m).onclick=function(){closeModal(m);};
+}
+
+/* ---------- run & round ---------- */
+function startRun(level){
+  var pool=shuffle(VERSES.filter(function(v){return v.level===level;})).slice(0,ROUNDS);
+  S.run={level:level,pool:pool,idx:0,gems:GEMS,score:0,correct:0,streak:0,missed:[],res:[],ended:false};
+  startRound();
+}
+function startRound(){
+  var run=S.run,v=run.pool[run.idx],pv=parseVerse(v);
+  var masked=pv.toks.filter(function(t){return !t.plain;}).length-pv.clue.length;
+  S.round={v:v,pv:pv,step:0,ans:[null,null,null],pts:[0,0,0],tapped:0,masked:Math.max(1,masked),
+           opts:buildOpts(v,0,run.level),locked:false,done:false,ok:false,bonus:0,half:false,slipped:false};
+  playShell();
+}
+function dotsHTML(){
+  var run=S.run,h="";
+  for(var i=0;i<run.pool.length;i++){
+    var c=i<run.res.length?(run.res[i]?"ok":"no"):(i===run.idx?"cur":"");
+    h+='<i class="'+c+'"></i>';
+  }
+  return h;
+}
+function gemsHTML(){
+  var h="";
+  for(var i=0;i<GEMS;i++)h+=gem("#5b9bff",32,i<S.run.gems?"":"lost");
+  return h;
+}
+function slabHTML(){
+  var R=S.round,h="";
+  R.pv.toks.forEach(function(t,i){
+    if(t.plain){h+=esc(t.pre+t.core+t.post)+" ";return;}
+    var isClue=R.pv.clue.indexOf(i)>=0;
+    h+='<span class="word">'+(t.pre?'<span class="p pre">'+esc(t.pre)+'</span>':'')+'<button class="tile'+(isClue?" clue open":"")+'" data-i="'+i+'" '+
+       (isClue?'tabindex="-1" aria-label="'+esc(t.core)+'"':'aria-label="Hidden word, '+t.core.length+' letters. Tap to reveal."')+'>'+esc(t.core)+'</button>'+
+       (t.post?'<span class="p post">'+esc(t.post)+'</span>':'')+'</span> ';
+  });
+  return h;
+}
+function playShell(){
+  S.screen="play";
+  var run=S.run,L=LV[run.level-1];
+  app.innerHTML=
+   '<div class="hud"><button class="icon-btn" id="leave" aria-label="Leave this run">'+ICON.x+'</button>'+
+   '<div class="hud-mid"><div class="lvname">'+L.name+'</div><div class="vnum">Verse '+(run.idx+1)+' of '+run.pool.length+'</div><div class="dots" id="dots">'+dotsHTML()+'</div></div>'+
+   '<div class="score" id="score">'+fmt(run.score)+'</div></div>'+
+   '<div class="gems" id="gems" aria-label="'+run.gems+' gems left">'+gemsHTML()+'</div>'+
+   '<div class="slab" id="slab">'+slabHTML()+'</div>'+
+   '<div class="meter"><span id="polished"></span><div class="bar"><i id="barfill"></i></div></div>'+
+   '<div id="panel"></div>';
+  $("#leave").onclick=leaveRun;
+  $("#slab").onclick=function(e){
+    var t=e.target.closest?e.target.closest(".tile"):null;
+    if(t)revealTile(t,true);
+  };
+  updateMeter();panel();
+  window.scrollTo(0,0);
+}
+function leaveRun(){
+  var m=modal('<h2>Leave this run?</h2><p style="margin-bottom:16px;color:var(--mute)">Your score for this run will be lost. Gems you have already earned are kept.</p>'+
+    '<div class="btns"><button class="primary" id="stay">Keep playing</button><button class="secondary" id="go">Leave</button></div>');
+  $("#stay",m).onclick=function(){closeModal(m);};
+  $("#go",m).onclick=function(){closeModal(m);home();};
+}
+function worth(){
+  var R=S.round,base=[80,100,120][R.step],f=1-0.75*(R.tapped/R.masked);
+  if(R.half)f*=0.5;
+  return Math.max(20,Math.round(base*f/5)*5);
+}
+function updateMeter(){
+  var R=S.round,pol=$("#polished"),bar=$("#barfill");
+  if(!R||S.screen!=="play"||!pol||!bar)return;
+  var total=R.pv.toks.filter(function(t){return !t.plain;}).length;
+  var open=$$(".tile.open").length;
+  pol.textContent=R.done?"Polished: all "+total+" words":"Polished "+open+" of "+total+" words. Tap a stone to reveal it.";
+  bar.style.width=Math.round(open/total*100)+"%";
+  var w=$("#worthnow");if(w)w.textContent="+"+worth();
+}
+function revealTile(t,byPlayer){
+  var R=S.round;
+  if(!R||t.classList.contains("open"))return;
+  if(R.done&&byPlayer)return;
+  t.classList.add("open","fresh");
+  t.removeAttribute("aria-label");
+  if(byPlayer){R.tapped++;sfx.tick();}
+  updateMeter();
+}
+function revealAll(){
+  var tiles=$$(".tile:not(.open)");
+  tiles.forEach(function(t,i){setTimeout(function(){
+    if(!document.body.contains(t))return;
+    t.classList.add("open","fresh");updateMeter();},reduced()?0:i*28);});
+}
+function panel(){
+  var R=S.round,el=$("#panel");
+  if(R.done){doneCard(el);return;}
+  var v=R.v,names=["Which book?","Which chapter?","Which verse?"];
+  var seg=function(i,label,ph){
+    var cls=R.ans[i]!==null?"done":(R.step===i?"cur":"");
+    return '<div class="seg '+cls+'"><small>'+label+'</small><b>'+(R.ans[i]!==null?esc(i===0?refName(R.ans[i]):R.ans[i]):ph)+'</b></div>';
+  };
+  var h='<div class="ref">'+seg(0,"Book","?")+seg(1,"Chapter","?")+seg(2,"Verse","?")+'</div>'+
+        '<div class="q"><span>'+names[R.step]+'</span><span class="worth" aria-label="Points available">'+gem("#ffbf47",20)+'<span id="worthnow">+'+worth()+'</span></span></div>'+
+        '<div class="opts">';
+  R.opts.forEach(function(o,i){
+    h+='<button class="opt'+(R.step>0?" num":"")+'" data-i="'+i+'">'+esc(o.label)+'</button>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
+  $$(".opt",el).forEach(function(b){b.onclick=function(){answer(+b.dataset.i,b);};});
+}
+function answer(i,btn){
+  var R=S.round,run=S.run;
+  if(R.locked||R.done)return;
+  R.locked=true;
+  var o=R.opts[i],btns=$$(".opt");
+  if(o.ok){
+    var w=worth();R.pts[R.step]=w;R.ans[R.step]=o.label;run.score+=w;
+    btn.classList.add("ok");btns.forEach(function(b){if(b!==btn)b.classList.add("dim");});
+    sfx.good();burst(btn,"#2ed39a",12);floatText(btn,"+"+w);updateScore();
+    setTimeout(function(){
+      if(R.step<2){R.step++;R.opts=buildOpts(R.v,R.step,run.level);R.locked=false;panel();}
+      else finishRound(true);
+    },700);
+  }else{
+    btn.classList.add("no");
+    btns.forEach(function(b){if(R.opts[+b.dataset.i].ok)b.classList.add("ok");else if(b!==btn)b.classList.add("dim");});
+    sfx.bad();vib(120);
+    var firstSlip=!R.slipped;
+    R.slipped=true;
+    if(firstSlip)loseGem();
+    if(R.step===0&&run.gems>0){
+      /* wrong book: the gem is gone, but she can still find the chapter and verse for half points */
+      R.half=true;
+      var right=R.opts.filter(function(x){return x.ok;})[0].label;
+      setTimeout(function(){
+        R.ans[0]=right;R.step=1;R.opts=buildOpts(R.v,1,run.level);R.locked=false;panel();
+      },1100);
+    }else{
+      setTimeout(function(){finishRound(false);},1100);
+    }
+  }
+}
+function loseGem(){
+  var run=S.run;run.gems--;
+  var g=$$("#gems .gem")[run.gems];if(g)g.classList.add("lost");
+  $("#gems").setAttribute("aria-label",run.gems+" gems left");
+}
+function updateScore(){
+  var s=$("#score");s.textContent=fmt(S.run.score);s.classList.remove("pop");void s.offsetWidth;s.classList.add("pop");
+}
+function finishRound(ok){
+  var R=S.round,run=S.run;
+  R.done=true;R.ok=ok;R.locked=false;
+  if(ok){
+    run.correct++;run.streak++;P.totalCorrect++;
+    if(run.streak>P.bestStreak)P.bestStreak=run.streak;
+    R.bonus=run.streak>=2?Math.min(run.streak,6)*20:0;run.score+=R.bonus;
+    sfx.win();burst($("#slab"),"#ffbf47",18);
+  }else{
+    run.streak=0;run.missed.push(R.v);
+  }
+  run.res.push(ok);
+  touchDay();
+  var fresh=checkBadges();
+  save();
+  $("#dots").innerHTML=dotsHTML();
+  updateScore();revealAll();
+  setTimeout(function(){updateMeter();},ok?0:200);
+  panel();
+  $("#panel").scrollIntoView({behavior:reduced()?"auto":"smooth",block:"nearest"});
+  fresh.forEach(function(b){toast(b);});
+}
+function doneCard(el){
+  var R=S.round,run=S.run,last=run.idx>=run.pool.length-1||run.gems<=0;
+  var pts=R.pts[0]+R.pts[1]+R.pts[2];
+  var h='<div class="done-card '+(R.ok?"ok":"bad")+'">'+
+    '<p class="msg">'+(R.ok?(R.tapped===0?"Found it without polishing a single stone.":"You found it."):"This one is")+'</p>'+
+    '<div class="big">'+esc(refOf(R.v))+'</div>';
+  if(R.ok){
+    h+='<div class="rows"><div><span>Book, chapter and verse</span><b>+'+pts+'</b></div>'+
+       (R.bonus?'<div><span>Streak of '+run.streak+' in a row</span><b>+'+R.bonus+'</b></div>':'')+'</div>';
+  }else{
+    h+='<p class="msg" style="margin-bottom:14px">'+(run.gems<=0?"You are out of gems. Your verses are listed on the next screen so you can read them again.":"Read it again above, then carry on. You have "+run.gems+(run.gems===1?" gem":" gems")+" left.")+'</p>';
+  }
+  h+='<button class="primary" id="next">'+(last?"See results":"Next verse")+'</button></div>';
+  el.innerHTML=h;
+  $("#next").onclick=nextRound;
+}
+function nextRound(){
+  var run=S.run;
+  run.idx++;
+  if(run.gems<=0||run.idx>=run.pool.length)endRun();else startRound();
+}
+
+/* ---------- results ---------- */
+function endRun(){
+  var run=S.run,L=run.level;
+  var passed=run.correct>=PASS&&run.gems>0;
+  var stars=run.gems<=0?(run.correct>=5?1:0):(run.correct>=9?3:run.correct>=PASS?2:run.correct>=5?1:0);
+  P.runs++;
+  var newBest=run.score>(P.best[L]||0);
+  if(newBest)P.best[L]=run.score;
+  if(stars>(P.stars[L]||0))P.stars[L]=stars;
+  var unlocked=null;
+  if(passed&&L<3&&!P.unlocked[L+1]){P.unlocked[L+1]=true;unlocked=LV[L];}
+  if(run.correct===ROUNDS&&run.gems===GEMS)P.flawless=true;
+  var fresh=checkBadges();
+  save();
+  results(run,passed,stars,newBest,unlocked,fresh);
+  if(unlocked){sfx.badge();}
+}
+function results(run,passed,stars,newBest,unlocked,fresh){
+  S.screen="results";
+  if(unlocked){fresh=fresh.filter(function(b){return b.id!=="sapphire"&&b.id!=="diamond";});}
+  var L=LV[run.level-1],out=run.gems<=0,i,sg="";
+  for(i=0;i<3;i++)sg+=gem(i<stars?"#ffbf47":"#4a3d70",54);
+  var title=out?"Out of gems":(passed?"Well done!":"Good effort");
+  var sub=out?("You found "+run.correct+" of "+(run.res.length)+" verses."):("You found "+run.correct+" of "+run.pool.length+" verses.");
+  var h='<div class="res"><div class="bigstars">'+sg+'</div><h2>'+title+'</h2><div class="big">'+fmt(run.score)+'</div>'+
+        '<p class="sub">'+sub+(newBest?" That is your best score on "+L.name+".":"")+'</p>';
+  if(unlocked)h+='<div class="unlock">'+gem(unlocked.color,30)+' '+unlocked.name+' is unlocked!</div>';
+  else if(!passed&&!out)h+='<p class="sub">Get '+PASS+' of '+ROUNDS+' right to unlock the next level.</p>';
+  else if(out)h+='<p class="sub">Each run starts with '+GEMS+' fresh gems.</p>';
+  if(fresh.length){h+='<div class="unlock" style="background:rgba(46,211,154,.1);border-color:rgba(46,211,154,.6)">New gems: '+fresh.map(function(b){return esc(b.name);}).join(", ")+'</div>';}
+  h+='<div class="btns"><button class="primary" id="again">Play '+L.name+' again</button>';
+  if(passed&&L.n<3||(P.unlocked[L.n+1]&&L.n<3))h+='<button class="secondary" id="nextlv">Play '+LV[L.n].name+'</button>';
+  h+='<button class="secondary" id="home">Back to levels</button></div>';
+  if(run.missed.length){
+    h+='<div class="review"><h3>Verses to read again</h3>';
+    run.missed.forEach(function(v){h+='<div class="rv"><b>'+esc(refOf(v))+'</b><p>'+esc(v.text)+'</p></div>';});
+    h+='</div>';
+  }
+  h+='</div>';
+  app.innerHTML=h;
+  $("#again").onclick=function(){startRun(run.level);};
+  var nl=$("#nextlv");if(nl)nl.onclick=function(){startRun(L.n+1);};
+  $("#home").onclick=home;
+  window.scrollTo(0,0);
+  if(passed||stars>0)setTimeout(function(){sfx.win();},250);
+  fresh.forEach(function(b){toast(b);});
+}
+
+/* ---------- go ---------- */
+window.__SG={S:function(){return S;},P:function(){return P;},home:home,startRun:startRun,parseVerse:parseVerse,buildOpts:buildOpts,VERSES:VERSES,BOOKS:BOOKS,CH:CH};
+home();
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){
+  window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});
+}
+})();
+</script>
+</body>
+</html>
