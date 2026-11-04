@@ -483,7 +483,7 @@ function showHelp(){
     '<li>A verse appears with its words hidden as stones. A few clue words are already polished.</li>'+
     '<li>Tap any stone to polish that word. The more you reveal, the fewer points you earn.</li>'+
     '<li>Pick the book, then the chapter, then the verse.</li>'+
-    '<li>A wrong pick costs a gem, and a verse never costs more than one. Miss the book and you can still find the chapter and verse for half points. You have '+GEMS+' gems for each run of '+ROUNDS+' verses.</li>'+
+    '<li>A wrong pick costs a gem, and a verse never costs more than one. Miss the book or the chapter and you can still carry on to the verse for half points. You have '+GEMS+' gems for each run of '+ROUNDS+' verses.</li>'+
     '<li>Get '+PASS+' of '+ROUNDS+' right to unlock the next level.</li></ol>'+
     '<div class="btns"><button class="primary" id="ok">Got it</button></div>');
   $("#ok",m).onclick=function(){closeModal(m);};
@@ -618,12 +618,12 @@ function answer(i,btn){
     var firstSlip=!R.slipped;
     R.slipped=true;
     if(firstSlip)loseGem();
-    if(R.step===0&&run.gems>0){
-      /* wrong book: the gem is gone, but she can still find the chapter and verse for half points */
+    if(R.step<2&&run.gems>0){
+      /* wrong book or chapter: the gem is gone (once per verse), but she can still go on to the verse for half points */
       R.half=true;
-      var right=R.opts.filter(function(x){return x.ok;})[0].label;
+      var right=R.opts.filter(function(x){return x.ok;})[0].label,at=R.step;
       setTimeout(function(){
-        R.ans[0]=right;R.step=1;R.opts=buildOpts(R.v,1,run.level);R.locked=false;panel();
+        R.ans[at]=right;R.step=at+1;R.opts=buildOpts(R.v,R.step,run.level);R.locked=false;panel();
       },1100);
     }else{
       setTimeout(function(){finishRound(false);},1100);
