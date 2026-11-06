@@ -292,16 +292,18 @@ var ICON={
 
 /* ---------- save ---------- */
 var KEY="scriptureGems.v1";
-function defaults(){return {unlocked:{1:true,2:false,3:false},best:{},stars:{},totalCorrect:0,bestStreak:0,dayStreak:0,lastDay:"",badges:{},flawless:false,seenHelp:false,sound:true,runs:0,lang:"en",mode:"verses",seenHelpC:false,seenHelpP:false,c:{unlocked:{1:true,2:false,3:false},best:{},stars:{}},p:{unlocked:{1:true,2:false,3:false,4:false,5:false},best:{},stars:{}}};}
+function defaults(){return {tokens:0,tokAcc:0,unlocked:{1:true,2:false,3:false},best:{},stars:{},totalCorrect:0,bestStreak:0,dayStreak:0,lastDay:"",badges:{},flawless:false,seenHelp:false,sound:true,runs:0,lang:"en",mode:"verses",seenHelpC:false,seenHelpP:false,c:{unlocked:{1:true,2:false,3:false},best:{},stars:{}},p:{unlocked:{1:true,2:false,3:false,4:false,5:false},best:{},stars:{}}};}
 function load(){
   var d=defaults();
   try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);for(var k in o){d[k]=o[k];}}}catch(e){}
   d.unlocked=d.unlocked||{1:true};d.unlocked[1]=true;d.best=d.best||{};d.stars=d.stars||{};d.badges=d.badges||{};
   d.c=d.c||{};d.c.unlocked=d.c.unlocked||{1:true};d.c.unlocked[1]=true;d.c.best=d.c.best||{};d.c.stars=d.c.stars||{};
   d.p=d.p||{};d.p.unlocked=d.p.unlocked||{1:true};d.p.unlocked[1]=true;d.p.best=d.p.best||{};d.p.stars=d.p.stars||{};
+  d.tokens=Math.max(0,Math.min(TOKMAX,+d.tokens||0));d.tokAcc=Math.max(0,+d.tokAcc||0);
   if(d.mode!=="chars"&&d.mode!=="places")d.mode="verses";
   return d;
 }
+var TOKMAX=3,TOKPTS=1000;
 var P=load();
 function MS(m){m=m||P.mode;return m==="chars"?P.c:(m==="places"?P.p:P);}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}}
@@ -375,7 +377,7 @@ function toast(b){
 function nextToast(){
   var b=toastQueue.shift(),t=$("#toast");
   if(!b){toastTimer=null;return;}
-  t.innerHTML=gem(b.color,34)+'<div>New gem: '+esc(b.name)+'<small>'+esc(b.desc)+'</small></div>';
+  t.innerHTML=gem(b.color,34)+'<div>'+(b.token?'':'New gem: ')+esc(b.name)+'<small>'+esc(b.desc)+'</small></div>';
   t.classList.add("show");sfx.badge();
   toastTimer=setTimeout(function(){t.classList.remove("show");toastTimer=setTimeout(nextToast,500);},2800);
 }
@@ -499,7 +501,32 @@ function home(){
     h+='<div class="badge'+(on?'':' off')+'"><div class="med">'+gem(b.color,32)+'</div><b>'+esc(b.name)+'</b><small>'+esc(b.desc)+'</small></div>';
   });
   h+='</div><p class="foot">'+(P.mode==="places"?(P.lang==="af"?"Plekke: gebaseer op die naslaanwerk Insight on the Scriptures.":"Places: based on the reference work Insight on the Scriptures."):ch?(P.lang==="af"?"Karakters: gebaseer op die boek Volg hulle geloof na.":"Characters: based on the book Imitate Their Faith."):("Verses: "+(P.lang==="af"?"Nuwe Wêreld-vertaling":"New World Translation of the Holy Scriptures")+"."))+'<br>Made for personal use.</p>';
+  h+='<div id="parahold" style="height:64px;margin-top:18px;text-align:center"><button class="secondary" id="para" style="display:inline-block;width:auto">'+(P.lang==="af"?"Bring paradys vandag":"Bring paradise today")+'</button></div>';
   app.innerHTML=h;
+  (function(){
+    var btn=$("#para"),n=0,calm=false;
+    var last=0;
+    function dodge(e){
+      if(calm)return;
+      var now=Date.now();if(now-last<400)return;last=now;
+      if(e&&e.preventDefault)e.preventDefault();
+      n++;
+      if(n>5){
+        calm=true;btn.style.position="";btn.style.left="";btn.style.top="";
+        btn.textContent=P.lang==="af"?"Wag geduldig":"Wait patiently";
+        return;
+      }
+      var w=btn.offsetWidth||200,hh=btn.offsetHeight||48;
+      btn.style.position="fixed";
+      btn.style.left=Math.max(8,Math.random()*(window.innerWidth-w-16))+"px";
+      btn.style.top=Math.max(8,Math.random()*(window.innerHeight-hh-16))+"px";
+      btn.style.zIndex=5;
+    }
+    btn.addEventListener("pointerenter",dodge);
+    btn.addEventListener("touchstart",dodge,{passive:false});
+    btn.addEventListener("focus",dodge);
+    btn.addEventListener("click",dodge);
+  })();
   $$(".lang button[data-l]").forEach(function(b){b.onclick=function(){
     if(P.lang===b.dataset.l)return;
     P.lang=b.dataset.l;save();loadVerses();home();
@@ -524,6 +551,7 @@ function showHelp(){
       '<li>Clues about a '+(P.mode==="places"?"place":"person")+' in the Bible appear one at a time. You start with the first.</li>'+
       '<li>Tap Show next clue to see another, up to five. Each extra clue lowers your points: 100, 80, 60, 40, then 20.</li>'+
       '<li>Pick the right name whenever you are ready.</li>'+
+      '<li>You earn a bonus token for every '+TOKPTS+' points. Use one to remove a wrong option (up to two per question, and you can keep up to '+TOKMAX+').</li>'+
       '<li>A wrong pick costs a gem. You have '+GEMS+' gems for each run of '+ROUNDS+' '+nm.many+'.</li>'+
       '<li>Get '+PASS+' of '+ROUNDS+' right to unlock the next level.</li></ol>'+
       '<div class="btns"><button class="primary" id="ok">Got it</button></div>');
@@ -700,6 +728,13 @@ function finishRound(ok){
     if(run.streak>P.bestStreak)P.bestStreak=run.streak;
     R.bonus=run.streak>=2?Math.min(run.streak,6)*20:0;run.score+=R.bonus;
     sfx.win();burst($("#slab"),"#ffbf47",18);
+    if(R.clue){
+      P.tokAcc+=(R.pts||0)+(R.bonus||0);
+      var got=false;
+      while(P.tokAcc>=TOKPTS){P.tokAcc-=TOKPTS;if(P.tokens<TOKMAX){P.tokens++;got=true;}}
+      if(P.tokens>=TOKMAX)P.tokAcc=0;
+      if(got)toast({token:1,color:"#ffbf47",name:"Bonus token earned",desc:"Use it to remove a wrong option. You have "+P.tokens+"."});
+    }
   }else{
     run.streak=0;run.missed.push(R.clue?R.c:R.v);
   }
@@ -744,10 +779,20 @@ function startCharRun(level,mode){
   S.run={mode:mode,level:level,pool:pool,idx:0,gems:GEMS,score:0,correct:0,streak:0,missed:[],res:[],ended:false};
   startCharRound();
 }
+var FEMALE={sarah:1,ruth:1,esther:1,mary:1,naomi:1,hannah:1,abigail:1,martha:1,peninnah:1,jezebel:1};
+var PLACECAT={"sinai":"mt","ararat":"mt","carmel":"mt","olives":"mt","hermon":"mt","tabor":"mt","gilboa":"mt","jordan":"water","redsea":"water","galilee":"water","eden":"site","gethsemane":"site","golgotha":"site","patmos":"island","egypt":"land","gilead":"land","moab":"land"};
+var PLACEXTRA={"en":{"mt":["Mount Moriah","Mount Nebo","Mount Zion","Mount Gerizim","Mount Ebal","Mount Hor","Mount Seir"],"water":["Nile River","Euphrates River","Tigris River","Kishon River","Arnon River","Jabbok River","Dead Sea"],"site":["Pool of Siloam","Pool of Bethzatha","Valley of Hinnom","Kidron Valley"],"island":["Cyprus","Crete","Malta","Rhodes"],"land":["Canaan","Judah","Edom","Midian","Assyria","Persia","Macedonia","Galatia","Phoenicia"],"city":["Sodom","Gomorrah","Lachish","Hazor","Gath","Ashdod","Gaza","Sidon","Smyrna","Pergamum","Laodicea","Colossae","Derbe","Iconium","Berea","Troas","Miletus","Salamis","Paphos","Bethphage"]},"af":{"mt":["Berg Moria","Berg Nebo","Berg Sion","Berg Gerisim","Berg Ebal","Berg Hor","Berg Seïr"],"water":["Nylrivier","Eufraatrivier","Tigrisrivier","Kisonrivier","Arnonrivier","Jabbokrivier","Soutsee"],"site":["Bad Siloam","Bad Betsata","Hinnomvallei","Kidronvallei"],"island":["Siprus","Kreta","Malta","Rodos"],"land":["Kanaän","Juda","Edom","Midian","Assirië","Persië","Masedonië","Galasië","Fenisië"],"city":["Sodom","Gomorra","Lagis","Hasor","Gat","Asdod","Gasa","Sidon","Smirna","Pergamum","Laodisea","Kolosse","Derbe","Ikonium","Berea","Troas","Milete","Salamis","Pafos","Betfage"]}}; /* extra names used only as wrong options */
 function charOpts(c,level,mode){
-  var all=POOL(mode),others=pick(all.filter(function(x){return x.level===level&&x.id!==c.id;}),3);
+  var all=POOL(mode),others,extras=[];
+  if(mode==="chars"){var f=!!FEMALE[c.id];all=all.filter(function(x){return !!FEMALE[x.id]===f;});}
+  if(mode==="places"){
+    var ct=PLACECAT[c.id]||"city";
+    all=all.filter(function(x){return (PLACECAT[x.id]||"city")===ct;});
+    extras=((PLACEXTRA[P.lang==="af"?"af":"en"]||{})[ct]||[]).map(function(n,i){return {id:"x"+ct+i,level:0,name:n};});
+  }
+  others=pick(all.filter(function(x){return x.level===level&&x.id!==c.id;}),3);
   if(others.length<3){
-    others=others.concat(pick(all.filter(function(x){return x.id!==c.id&&others.indexOf(x)<0;}),3-others.length));
+    others=others.concat(pick(all.filter(function(x){return x.id!==c.id&&others.indexOf(x)<0;}).concat(extras),3-others.length));
   }
   return shuffle([c].concat(others)).map(function(x){return {label:x.name,ok:x.id===c.id};});
 }
@@ -786,9 +831,19 @@ function charPanel(){
   R.opts.forEach(function(o,i){h+='<button class="opt" data-i="'+i+'">'+esc(o.label)+'</button>';});
   h+='</div>';
   if(R.shown<5)h+='<button class="secondary" id="more" style="margin-top:14px">Show next clue (worth +'+CW[R.shown]+')</button>';
+  if(P.tokens>0&&R.opts.length>2&&(R.removed||0)<2)h+='<button class="secondary" id="tok" style="margin-top:10px">Remove a wrong option ('+P.tokens+(P.tokens===1?' token':' tokens')+' left)</button>';
   el.innerHTML=h;
   $$(".opt",el).forEach(function(b){b.onclick=function(){charAnswer(+b.dataset.i,b);};});
   var mb=$("#more");if(mb)mb.onclick=moreClue;
+  var tk=$("#tok");if(tk)tk.onclick=useToken;
+}
+function useToken(){
+  var R=S.round;
+  if(R.locked||R.done||P.tokens<1||R.opts.length<=2||(R.removed||0)>=2)return;
+  var wrong=[];R.opts.forEach(function(o,i){if(!o.ok)wrong.push(i);});
+  var k=wrong[Math.floor(Math.random()*wrong.length)];
+  R.opts.splice(k,1);R.removed=(R.removed||0)+1;P.tokens--;save();sfx.tick();
+  charPanel();
 }
 function moreClue(){
   var R=S.round;
@@ -885,7 +940,7 @@ function results(run,passed,stars,newBest,unlocked,fresh){
 }
 
 /* ---------- go ---------- */
-window.__SG={S:function(){return S;},P:function(){return P;},home:home,startRun:startRun,parseVerse:parseVerse,buildOpts:buildOpts,VERSES:VERSES,CHARS:CHARS,PLACES:PLACES,loadVerses:loadVerses,BOOKS:BOOKS,CH:CH};
+window.__SG={charOpts:charOpts,PLACECAT:PLACECAT,PLACEXTRA:PLACEXTRA,S:function(){return S;},P:function(){return P;},home:home,startRun:startRun,parseVerse:parseVerse,buildOpts:buildOpts,VERSES:VERSES,CHARS:CHARS,PLACES:PLACES,loadVerses:loadVerses,BOOKS:BOOKS,CH:CH};
 home();
 if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){
   window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});
