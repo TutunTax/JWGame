@@ -501,18 +501,18 @@ function home(){
     h+='<div class="badge'+(on?'':' off')+'"><div class="med">'+gem(b.color,32)+'</div><b>'+esc(b.name)+'</b><small>'+esc(b.desc)+'</small></div>';
   });
   h+='</div><p class="foot">'+(P.mode==="places"?(P.lang==="af"?"Plekke: gebaseer op die naslaanwerk Insight on the Scriptures.":"Places: based on the reference work Insight on the Scriptures."):ch?(P.lang==="af"?"Karakters: gebaseer op die boek Volg hulle geloof na.":"Characters: based on the book Imitate Their Faith."):("Verses: "+(P.lang==="af"?"Nuwe Wêreld-vertaling":"New World Translation of the Holy Scriptures")+"."))+'<br>Made for personal use.</p>';
-  h+='<div id="parahold" style="height:64px;margin-top:18px;text-align:center"><button class="secondary" id="para" style="display:inline-block;width:auto">'+(P.lang==="af"?"Bring paradys vandag":"Bring paradise today")+'</button></div>';
+  h+='<div id="parahold" style="height:64px;margin-top:18px;text-align:center"><button class="primary" id="para" style="display:inline-block;width:auto;padding-left:26px;padding-right:26px">'+(P.lang==="af"?"Bring paradys vandag":"Bring paradise today")+'</button></div>';
   app.innerHTML=h;
   (function(){
     var btn=$("#para"),n=0,calm=false;
-    var last=0;
+    var last=0,calmAt=0;
     function dodge(e){
       if(calm)return;
       var now=Date.now();if(now-last<400)return;last=now;
       if(e&&e.preventDefault)e.preventDefault();
       n++;
       if(n>5){
-        calm=true;btn.style.position="";btn.style.left="";btn.style.top="";
+        calm=true;calmAt=Date.now();btn.style.position="";btn.style.left="";btn.style.top="";
         btn.textContent=P.lang==="af"?"Wag geduldig":"Wait patiently";
         return;
       }
@@ -525,7 +525,14 @@ function home(){
     btn.addEventListener("pointerenter",dodge);
     btn.addEventListener("touchstart",dodge,{passive:false});
     btn.addEventListener("focus",dodge);
-    btn.addEventListener("click",dodge);
+    btn.addEventListener("click",function(e){
+      if(calm){
+        if(Date.now()-calmAt<800)return;
+        calm=false;n=0;btn.textContent=P.lang==="af"?"Bring paradys vandag":"Bring paradise today";
+        return;
+      }
+      dodge(e);
+    });
   })();
   $$(".lang button[data-l]").forEach(function(b){b.onclick=function(){
     if(P.lang===b.dataset.l)return;
